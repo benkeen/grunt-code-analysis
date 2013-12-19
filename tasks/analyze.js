@@ -9,119 +9,93 @@
 'use strict';
 
 module.exports = function(grunt) {
+	var fs   = require('fs');
+	var mime = require('mime');
 
-	grunt.registerMultiTask('search', 'A grunt plugin to generate stats about your codebase. ', function() {
+	var knownFileExtensions = {
+		"js": "JavaScript",
+		"json": "JSON"
+	};
+
+
+	grunt.registerMultiTask('analyze', 'A grunt plugin to generate stats about your codebase. ', function() {
 
 		// merge task-specific and/or target-specific options with these defaults
 		var options = this.options({
 			logFormat: 'json'
 		});
 
+		var statsByFileExtension = {};
+
 		// now iterate over all specified file groups
 		this.files.forEach(function(f) {
 
-			// filter out invalid files and folders
-			var filePaths = [];
-			f.src.filter(function(filepath) {
-				if (grunt.file.isDir(filepath)) {
+			f.src.filter(function(filePath) {
+				if (grunt.file.isDir(filePath)) {
 					return;
 				}
 
-				console.log(filepath);
+				// use the mime extension to do all the nasty stuff to determine the file extension. It
+				// does lots of smart stuff that aren't covered by merely checking the file extension
+				var fileExtension = mime.extension(mime.lookup(filePath));
 
-				// *** this was in the gruntplugin example, but it doesn't seem to even GET here if the file specified
-				// doesn't exist... ***
-				if (!grunt.file.exists(filepath)) {
-					grunt.log.warn('Source file "' + filepath + '" not found.');
-				} else {
-					filePaths.push(filepath);
+				// new file extension?
+				if (!statsByFileExtension.hasOwnProperty(fileExtension)) {
+					statsByFileExtension[fileExtension] = {
+						numFiles: 0,
+						numLines: [],
+						fileSizes: [],
+						files: []
+					}
 				}
+
+				var stats = _analyzeFile(filePath);
+				statsByFileExtension[fileExtension].numFiles++;
+				statsByFileExtension[fileExtension].numLines.push(stats.numLines);
+				statsByFileExtension[fileExtension].fileSizes.push(stats.fileSize);
+				statsByFileExtension[fileExtension].files.push(stats.file);
 			});
 
-			// write the log file - even if there are no results. It'll just contain a "numResults: 0" which is useful
-			// in of itself
-			//_generateLogFile(options, filePaths, matches, numMatches);
+			// now convert the raw stats into something ni
+			var cleanStats = _cleanUpStats(statsByFileExtension);
+			console.log(cleanStats);
 		});
 	});
 
 
-	var _generateLogFile = function(options, filePaths, results, numResults) {
-		var content = '';
+	var _analyzeFile = function(filePath) {
+		var stats = fs.statSync(filePath);
+		var fileSize = stats.size;
 
-		if (options.logFormat === "json") {
-			content = _getJSONLogFormat(options, filePaths, results, numResults);
-		} else if (options.logFormat === "xml") {
-			content = _getXMLLogFormat(options, filePaths, results, numResults);
-		} else if (options.logFormat === "text") {
-			content = _getTextLogFormat(options, filePaths, results, numResults);
-		}
+		// now get the number of lines
+		var src = grunt.file.read(filePath);
+		var numLines = src.split("\n").length;
 
-		grunt.file.write(options.logFile, content);
+		return {
+			numLines: numLines,
+			fileSize: fileSize,
+			file: filePath
+		};
 	};
 
-
-	/**
-	 * This generates a JSON formatted file of the match results. Boy I miss templating. :-)
-	 * @param options
-	 * @param results
-	 * @param numResults
-	 * @returns {string}
-	 * @private
-	 */
-	var _getJSONLogFormat = function(options, filePaths, results, numResults) {
-		var content = "{\n\t\"numResults\": " + numResults + ",\n"
-			+ "\t\"creationDate\": \"" + _getISODateString() + "\",\n"
-			+ "\t\"results\": {\n";
-
-		var group = [];
-		for (var file in results) {
-			var groupStr = "\t\t\"" + file + "\": [\n";
-
-			var matchGroup = [];
-			for (var i=0; i<results[file].length; i++) {
-				matchGroup.push("\t\t\t{\n"
-					+ "\t\t\t\t\"line\": " + results[file][i].line + ",\n"
-					+ "\t\t\t\t\"match\": " + "\"" + _cleanStr(results[file][i].match) + "\""
-					+ "\n\t\t\t}");
+	var _cleanUpStats = function(stats) {
+		var cleanStats = [];
+		for (var fileExtension in stats) {
+			var totalLines = 0;
+			var numLinesCounted = stats[fileExtension].numLines.length;
+			for (var i=0; i<numLinesCounted; ++i) {
+				totalLines += stats[fileExtension].numLines[i];
 			}
-			groupStr += matchGroup.join(",\n") + "\n";
-			groupStr += "\t\t]"
-			group.push(groupStr);
-		}
-		content += group.join(",\n");
-		content += "\n\t}"
+			var averageNumLines = Math.round(totalLines / numLinesCounted);
 
-		if (options.outputExaminedFiles) {
-			content += ",\n\t\"examinedFiles\": [\n";
-			var files = [];
-			for (var i=0; i<filePaths.length; i++) {
-				files.push("\t\t\"" + _cleanStr(filePaths[i]) + "\"");
-			}
-			content += files.join(",\n");
-			content += "\n\t]";
+			cleanStats.push({
+				extension: fileExtension,
+				numFiles: stats[fileExtension].numFiles,
+				averageNumLines: averageNumLines,
+				totalLines: totalLines
+			});
 		}
 
-		content += "\n}";
-
-		return content;
-	};
-
-	// helpers ----------------
-
-	var _cleanStr = function(str) {
-		return str.replace(/"/g, "\\\"");
-	}
-
-	var _getISODateString = function() {
-		var d = new Date();
-		function pad(n) {
-			return n < 10 ? '0' + n : n;
-		}
-		return d.getUTCFullYear()+'-'
-			+ pad(d.getUTCMonth()+1)+'-'
-			+ pad(d.getUTCDate()) +' '
-			+ pad(d.getUTCHours())+':'
-			+ pad(d.getUTCMinutes())+':'
-			+ pad(d.getUTCSeconds())
+		return cleanStats;
 	};
 };

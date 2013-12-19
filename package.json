@@ -1,6 +1,6 @@
 {
   "name": "grunt-codebase-stats",
-  "description": "A grunt plugin to generate stats about your codebase. ",
+  "description": "A grunt plugin to generate stats about your codebase.",
   "version": "0.1.0",
   "homepage": "https://github.com/benkeen/grunt-codebase-stats",
   "author": {
@@ -31,7 +31,9 @@
   "devDependencies": {
     "grunt-contrib-clean": "~0.4.0",
     "grunt-contrib-nodeunit": "~0.2.0",
-    "grunt": "~0.4.1"
+    "grunt": "~0.4.1",
+    "mime": "~1.2.11",
+    "d3": "~3.3.13"
   },
   "peerDependencies": {
     "grunt": "~0.4.1"
@@ -39,9 +41,9 @@
   "keywords": [
     "gruntplugin",
     "stats",
-	"statistics",
+    "statistics",
     "analysis",
-	"codebase",
-	"code"
+    "codebase",
+    "code"
   ]
 }

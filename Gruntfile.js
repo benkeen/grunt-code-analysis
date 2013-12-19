@@ -18,7 +18,7 @@ module.exports = function(grunt) {
 		},
 
 		// configuration to be run (and then tested)
-		search: {
+		analyze: {
 			default: {
 				files: {
 					src: ["**/*"]
@@ -45,5 +45,5 @@ module.exports = function(grunt) {
 	grunt.registerTask('test', ['clean', 'search', 'nodeunit']);
 
 	// by default, lint and run all tests
-	grunt.registerTask('default', ['search', 'test']);
+	grunt.registerTask('default', ['analyze']);
 };
