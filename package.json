@@ -1,0 +1,47 @@
+{
+  "name": "grunt-codebase-stats",
+  "description": "A grunt plugin to generate stats about your codebase. ",
+  "version": "0.1.0",
+  "homepage": "https://github.com/benkeen/grunt-codebase-stats",
+  "author": {
+    "name": "Ben Keen",
+    "email": "ben.keen@gmail.com",
+    "url": "http://www.benjaminkeen.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/benkeen/grunt-codebase-stats.git"
+  },
+  "bugs": {
+    "url": "https://github.com/benkeen/grunt-codebase-stats/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/benkeen/grunt-codebase-stats/blob/master/LICENSE"
+    }
+  ],
+  "main": "Gruntfile.js",
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt-contrib-clean": "~0.4.0",
+    "grunt-contrib-nodeunit": "~0.2.0",
+    "grunt": "~0.4.1"
+  },
+  "peerDependencies": {
+    "grunt": "~0.4.1"
+  },
+  "keywords": [
+    "gruntplugin",
+    "stats",
+	"statistics",
+    "analysis",
+	"codebase",
+	"code"
+  ]
+}
