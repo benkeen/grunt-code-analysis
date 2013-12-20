@@ -4,16 +4,125 @@
 <meta charset="utf-8">
 <style>
 	body {
-		font: 10px sans-serif;
+		font: 15px sans-serif;
 	}
 	.arc path {
 		stroke: #ffffff;
+		stroke-width: 1px;
 	}
 </style>
 <script src="../node_modules/d3/d3.min.js"></script>
 </head>
 <body>
 
+<input type="button" value="..." onclick="trans()" />
+
+<script>
+	var data = [ { extension: 'js',
+		numFiles: 1756,
+		averageNumLines: 150,
+		totalLines: 264199 },
+		{ extension: 'bin',
+			numFiles: 422,
+			averageNumLines: 191,
+			totalLines: 80805 },
+		{ extension: 'markdown',
+			numFiles: 132,
+			averageNumLines: 154,
+			totalLines: 20393 },
+		{ extension: 'json',
+			numFiles: 116,
+			averageNumLines: 48,
+			totalLines: 5516 },
+		{ extension: 'txt',
+			numFiles: 65,
+			averageNumLines: 295,
+			totalLines: 19162 },
+		{ extension: 'c',
+			numFiles: 164,
+			averageNumLines: 923,
+			totalLines: 151290 },
+		{ extension: 'zip',
+			numFiles: 1,
+			averageNumLines: 20,
+			totalLines: 20 },
+		{ extension: 'html',
+			numFiles: 68,
+			averageNumLines: 286,
+			totalLines: 19419 },
+		{ extension: 'rss',
+			numFiles: 1,
+			averageNumLines: 1,
+			totalLines: 1 },
+		{ extension: 'png',
+			numFiles: 18,
+			averageNumLines: 143,
+			totalLines: 2577 },
+		{ extension: 'sh',
+			numFiles: 72,
+			averageNumLines: 51,
+			totalLines: 3689 },
+		{ extension: 'sub',
+			numFiles: 2,
+			averageNumLines: 1628,
+			totalLines: 3255 } ];
+
+// ----------------------------
+
+var width = 960,
+	height = 500,
+	radius = Math.min(width, height) / 2;
+
+var color = d3.scale.ordinal()
+	.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+var arc = d3.svg.arc()
+	.outerRadius(radius - 10)
+	.innerRadius(0);
+
+var pie = d3.layout.pie()
+	.sort(null)
+	.value(function(d) { return d.numFiles; });
+
+var svg = d3.select("body").append("svg")
+	.attr("width", width)
+	.attr("height", height)
+	.append("g")
+	.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+var g = svg.selectAll(".arc")
+	.data(pie(data))
+	.enter().append("g")
+	.attr("class", "arc");
+
+g.append("path")
+	.attr("d", arc)
+	.attr("id", function(el, index) {
+		return "path" + index;
+	})
+	.attr("class", "segment")
+	.style("fill", function(d, index) { return color(index); });
+
+g.append("text")
+	.attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+	.attr("dy", ".35em")
+	.style("text-anchor", "middle")
+	.text(function(d) {
+		if (d.value < 60) {
+			return "";
+		} else {
+			return d.data.extension;
+		}
+	});
+
+function clickElement() {
+	d3.select("#path1").transition()
+		.duration(1000)
+		.style("fill", "#f2f2f2");
+}
+
+
+</script>
 
 </body>
 </html>
