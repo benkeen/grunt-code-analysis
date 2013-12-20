@@ -12,12 +12,6 @@ module.exports = function(grunt) {
 	var fs   = require('fs');
 	var mime = require('mime');
 
-	var knownFileExtensions = {
-		"js": "JavaScript",
-		"json": "JSON"
-	};
-
-
 	grunt.registerMultiTask('analyze', 'A grunt plugin to generate stats about your codebase. ', function() {
 
 		// merge task-specific and/or target-specific options with these defaults
